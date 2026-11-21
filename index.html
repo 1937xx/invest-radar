@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111c2b">
+<title>Global Invest Radar · 全球投资资讯雷达</title>
+<style>
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;color:#e8eef7;background:#101826;--panel:#182435;--panel2:#202e40;--line:#2d3c50;--muted:#93a4b9;--blue:#77b8ff;--mint:#7de0ba;--orange:#ffc780}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 5% 0%,#1a2c3f 0,transparent 42%),#101826}
+button,input{font:inherit}button{cursor:pointer}
+.shell{max-width:1160px;margin:auto;padding:28px 24px 70px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:26px}
+.brand{display:flex;gap:12px;align-items:center}.logo{height:42px;width:42px;border-radius:14px;background:linear-gradient(140deg,#73c6ff,#7de0ba);display:grid;place-items:center;color:#13202d;font-weight:900;font-size:19px}
+h1{font-size:20px;margin:0;letter-spacing:-.5px}header p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.head-tools{display:flex;gap:8px;align-items:center}.btn{border:1px solid var(--line);background:#1e2b3d;color:#dce9f5;padding:10px 13px;border-radius:11px;font-size:12px;font-weight:600}.btn:hover{background:#2a3b50}.btn.primary{background:#70b5ef;color:#132232;border-color:transparent}.btn:disabled{opacity:.5;cursor:wait}
+.hero{border:1px solid #2b4053;background:linear-gradient(110deg,#17293a,#1a2d3e 65%,#1e3940);padding:22px 24px;border-radius:20px;margin-bottom:17px;display:flex;align-items:center;justify-content:space-between;gap:20px;overflow:hidden}
+.hero h2{font-size:22px;margin:0 0 7px;letter-spacing:-.6px}.hero p{font-size:13px;color:#a5b8cc;margin:0;line-height:1.7}
+.hero-stat{min-width:150px;text-align:right}.hero-stat b{display:block;font-size:30px;color:var(--mint)}.hero-stat span{font-size:11px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:17px}.stat{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:16px}.stat small{color:var(--muted);font-size:11px}.stat strong{display:block;font-size:18px;margin-top:8px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:20px 0 14px;flex-wrap:wrap}.filters{display:flex;gap:7px;flex-wrap:wrap}.filter{border:1px solid var(--line);border-radius:20px;padding:8px 12px;background:transparent;color:var(--muted);font-size:11px}.filter.active{background:#213c4e;color:#95d5ff;border-color:#35546c}
+.search{background:#172334;border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:#eaf2f9;min-width:min(240px,100%);font-size:12px}
+.news-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.news{border:1px solid var(--line);border-radius:17px;background:var(--panel);padding:17px;transition:transform .15s,border-color .15s;min-width:0;display:flex;flex-direction:column}
+.news:hover{transform:translateY(-2px);border-color:#47627a}
+.news-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}.tag{font-size:10px;border-radius:6px;padding:5px 8px;background:#23384a;color:#8fd2ff}.date{font-size:10px;color:var(--muted)}
+.news h3{font-size:14px;line-height:1.55;margin:0 0 9px;font-weight:650}.news p{font-size:12px;color:#aab8c9;line-height:1.65;margin:0 0 14px;flex:1}
+.news-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #253448;padding-top:12px}.source{font-size:10px;color:#879bb2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.read{color:var(--blue);font-size:11px;text-decoration:none;font-weight:600;white-space:nowrap}
+.state{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:34px;text-align:center;color:var(--muted);font-size:13px;grid-column:1/-1}
+.footer{margin-top:17px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#72849a;font-size:10px}
+.pulse{width:7px;height:7px;background:#74d8a9;display:inline-block;border-radius:50%;box-shadow:0 0 10px #74d8a9;margin-right:6px}
+@media(max-width:760px){.shell{padding:18px 14px 44px}header{align-items:flex-start}.brand h1{font-size:17px}.head-tools .btn{padding:9px 10px}.hero{padding:18px}.hero h2{font-size:19px}.hero-stat{min-width:100px}.hero-stat b{font-size:24px}.stats{grid-template-columns:repeat(2,1fr);gap:9px}.stat{padding:13px}.news-list{grid-template-columns:1fr}.toolbar{align-items:stretch}.search{width:100%}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+ <div class="brand"><div class="logo">◎</div><div><h1>Global Invest Radar</h1><p>全球实时投资资讯 · 聚合雷达</p></div></div>
+ <div class="head-tools"><button class="btn" id="refresh">↻ 刷新资讯</button></div>
+</header>
+<section class="hero">
+ <div><h2>全球投资信息流</h2><p>跨市场聚合投资新闻 · 快速扫描市场变化<br>新闻来自公开资讯聚合源，不构成投资建议。</p></div>
+ <div class="hero-stat"><b id="count">—</b><span>条资讯 · 当前展示</span></div>
+</section>
+<div class="stats">
+ <div class="stat"><small>覆盖市场</small><strong>全球 · 多市场</strong></div>
+ <div class="stat"><small>内容方向</small><strong>宏观 / 股票 / 科技</strong></div>
+ <div class="stat"><small>新闻条数</small><strong id="statArticles">等待更新</strong></div>
+ <div class="stat"><small>更新时间</small><strong id="updated">尚未刷新</strong></div>
+</div>
+<div class="toolbar">
+ <div class="filters" id="filters">
+   <button class="filter active" data-filter="all">全部</button>
+   <button class="filter" data-filter="markets">股票市场</button>
+   <button class="filter" data-filter="macro">宏观经济</button>
+   <button class="filter" data-filter="tech">科技 / AI</button>
+   <button class="filter" data-filter="crypto">加密资产</button>
+   <button class="filter" data-filter="gold">黄金 / 商品</button>
+ </div>
+ <input class="search" id="search" type="search" placeholder="搜索标题、来源或关键词…" />
+</div>
+<div id="news" class="news-list"><div class="state">正在加载最新全球投资资讯…</div></div>
+<div class="footer"><span><i class="pulse"></i><span id="status">准备连接资讯源</span></span><span>自动刷新间隔：5 分钟 · 每次最多 10 条</span></div>
+</div>
+<script>
+const API = "https://api.gdeltproject.org/api/v2/doc/doc";
+const searchQuery = '(investment OR stock OR markets OR inflation OR economy OR technology OR gold OR crypto OR earnings)';
+const categories = {
+  markets: /(stock|share|market|equity|nasdaq|dow|s&p|ftse|nikkei|hang seng|investor)/i,
+  macro: /(inflation|econom|central bank|fed |federal reserve|rate|gdp|tariff|bond|currency)/i,
+  tech: /(technology|tech |artificial intelligence|\bai\b|chip|semiconductor|nvidia|robot|cloud)/i,
+  crypto: /(crypto|bitcoin|ethereum|blockchain|token)/i,
+  gold: /(gold|silver|oil|commodity|copper|energy|crude)/i
+};
+let articles = [], activeFilter = "all", searchText = "";
+const $ = id => document.getElementById(id);
+function safeText(value) {
+  const temp = document.createElement("div");
+  temp.textContent = value || "";
+  return temp.innerHTML;
+}
+function plain(html) {
+  const div=document.createElement("div");div.innerHTML=html||"";
+  return (div.textContent||div.innerText||"").replace(/\s+/g," ").trim();
+}
+function detectCategory(a) {
+  const text=(a.title+" "+a.domain).toLowerCase();
+  for(const [key,regex] of Object.entries(categories))if(regex.test(text))return key;
+  return "markets";
+}
+function categoryName(key){return ({markets:"股票市场",macro:"宏观经济",tech:"科技 / AI",crypto:"加密资产",gold:"黄金 / 商品"})[key]||"投资资讯";}
+function fmtDate(raw) {
+  if(!raw)return "时间未知";
+  const d=new Date(raw);
+  if(isNaN(d.getTime()))return raw;
+  return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+function draw(){
+ const filtered=articles.filter(a=>{
+  const cat=detectCategory(a);
+  const matchesCat=activeFilter==="all"||cat===activeFilter;
+  const hay=(a.title+" "+a.summary+" "+a.domain).toLowerCase();
+  return matchesCat && (!searchText||hay.includes(searchText.toLowerCase()));
+ });
+ $("count").textContent=filtered.length;
+ $("statArticles").textContent=articles.length+" 条";
+ const root=$("news");
+ if(!filtered.length){root.innerHTML='<div class="state">没有找到匹配的资讯。试试切换分类或调整关键词。</div>';return}
+ root.innerHTML=filtered.slice(0,10).map(a=>`
+ <article class="news">
+   <div class="news-top"><span class="tag">${safeText(categoryName(detectCategory(a)))}</span><span class="date">${safeText(fmtDate(a.date))}</span></div>
+   <h3>${safeText(a.title)}</h3><p>${safeText(a.summary||"暂无摘要，请打开原文查看详细内容。")}</p>
+   <div class="news-bottom"><span class="source" title="${safeText(a.domain)}">${safeText(a.domain||"来源未知")}</span><a class="read" href="${safeText(a.url)}" target="_blank" rel="noopener noreferrer">查看原文 ↗</a></div>
+ </article>`).join("");
+}
+async function fetchNews(){
+ const btn=$("refresh");btn.disabled=true;btn.textContent="刷新中…";$("status").textContent="正在获取最新资讯";
+ try{
+   const params=new URLSearchParams({query:searchQuery,mode:"ArtList",format:"json",maxrecords:"30",sort:"HybridRel"});
+   const resp=await fetch(API+"?"+params.toString(),{cache:"no-store"});
+   if(!resp.ok)throw new Error("资讯源响应异常（HTTP "+resp.status+"）");
+   const data=await resp.json();
+   if(data.status!=="ok"||!Array.isArray(data.articles))throw new Error(data.message||"未能解析资讯数据");
+   const seen=new Set();
+   articles=data.articles.map(x=>({
+     title:x.title||"（无标题）",
+     url:x.url||"",
+     date:x.seendate||x.date||"",
+     domain:x.domain||"",
+     summary:plain(x.excerpt||x.description||"")
+   })).filter(x=>x.title&&x.url&&!seen.has(x.url)&&seen.add(x.url))
+     .sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
+   if(!articles.length)throw new Error("当前没有获取到资讯，请稍后重试");
+   draw();
+   const now=new Date();
+   $("updated").textContent=now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+   $("status").textContent="资讯已更新 · GDELT 公共新闻数据库";
+ }catch(err){
+   $("news").innerHTML=`<div class="state"><b>资讯获取失败</b><br><br>${safeText(err.message)}<br><br>请检查网络连接后点击“刷新资讯”。如浏览器限制跨域访问，请使用在线托管版或本地代理方式运行。</div>`;
+   $("count").textContent="0";$("statArticles").textContent="暂不可用";$("status").textContent="数据连接失败";
+ }finally{btn.disabled=false;btn.textContent="↻ 刷新资讯";}
+}
+$("refresh").addEventListener("click",fetchNews);
+$("filters").addEventListener("click",e=>{const btn=e.target.closest("[data-filter]");if(!btn)return;activeFilter=btn.dataset.filter;document.querySelectorAll(".filter").forEach(b=>b.classList.toggle("active",b===btn));draw();});
+$("search").addEventListener("input",e=>{searchText=e.target.value.trim();draw();});
+fetchNews();
+setInterval(fetchNews,5*60*1000);
+</script>
+</body>
+</html>
