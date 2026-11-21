@@ -114,31 +114,46 @@ function draw(){
  </article>`).join("");
 }
 async function fetchNews(){
- const btn=$("refresh");btn.disabled=true;btn.textContent="刷新中…";$("status").textContent="正在获取最新资讯";
- try{
-   const params=new URLSearchParams({query:searchQuery,mode:"ArtList",format:"json",maxrecords:"30",sort:"HybridRel"});
-   const resp=await fetch(API+"?"+params.toString(),{cache:"no-store"});
-   if(!resp.ok)throw new Error("资讯源响应异常（HTTP "+resp.status+"）");
-   const data=await resp.json();
-   if(data.status!=="ok"||!Array.isArray(data.articles))throw new Error(data.message||"未能解析资讯数据");
-   const seen=new Set();
-   articles=data.articles.map(x=>({
-     title:x.title||"（无标题）",
-     url:x.url||"",
-     date:x.seendate||x.date||"",
-     domain:x.domain||"",
-     summary:plain(x.excerpt||x.description||"")
-   })).filter(x=>x.title&&x.url&&!seen.has(x.url)&&seen.add(x.url))
-     .sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
-   if(!articles.length)throw new Error("当前没有获取到资讯，请稍后重试");
-   draw();
-   const now=new Date();
-   $("updated").textContent=now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
-   $("status").textContent="资讯已更新 · GDELT 公共新闻数据库";
- }catch(err){
-   $("news").innerHTML=`<div class="state"><b>资讯获取失败</b><br><br>${safeText(err.message)}<br><br>请检查网络连接后点击“刷新资讯”。如浏览器限制跨域访问，请使用在线托管版或本地代理方式运行。</div>`;
-   $("count").textContent="0";$("statArticles").textContent="暂不可用";$("status").textContent="数据连接失败";
- }finally{btn.disabled=false;btn.textContent="↻ 刷新资讯";}
+  const btn=$("refresh");
+  btn.disabled=true;
+  btn.textContent="刷新中…";
+  $("status").textContent="正在获取最新资讯";
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),15000);
+  try{
+    const params=new URLSearchParams({query:searchQuery,mode:"ArtList",format:"json",maxrecords:"30",sort:"HybridRel"});
+    const resp=await fetch(API+"?"+params.toString(),{cache:"no-store",signal:controller.signal});
+    if(!resp.ok)throw new Error("资讯源响应异常（HTTP "+resp.status+"）");
+    const contentType=resp.headers.get("content-type")||"";
+    const raw=await resp.text();
+    if(contentType.includes("text/html")||raw.trim().startsWith("<"))throw new Error("资讯接口返回了网页错误内容，而不是 JSON");
+    let data;
+    try{data=JSON.parse(raw)}catch(e){throw new Error("资讯接口返回格式异常，无法解析 JSON")}
+    // GDELT ArtList returns an articles array; it does not require a status field.
+    if(!Array.isArray(data.articles))throw new Error(data.message||"接口返回中没有 articles 新闻列表");
+    const seen=new Set();
+    articles=data.articles.map(x=>({
+      title:x.title||"（无标题）",
+      url:x.url||"",
+      date:x.seendate||x.date||"",
+      domain:x.domain||"",
+      summary:plain(x.excerpt||x.description||"")
+    })).filter(x=>x.title&&x.url&&!seen.has(x.url)&&seen.add(x.url))
+      .sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
+    if(!articles.length)throw new Error("接口正常响应，但没有找到符合条件的资讯。稍后再试。");
+    draw();
+    const now=new Date();
+    $("updated").textContent=now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+    $("status").textContent="资讯已更新 · GDELT 公共新闻数据库";
+  }catch(err){
+    const message=err.name==="AbortError"?"请求超时（15 秒），请稍后再试。":(err.message||"未知错误");
+    $("news").innerHTML=`<div class="state"><b>资讯获取失败</b><br><br>${safeText(message)}<br><br>请检查网络连接后点击“刷新资讯”。</div>`;
+    $("count").textContent="0";$("statArticles").textContent="暂不可用";$("status").textContent="数据连接失败";
+  }finally{
+    clearTimeout(timeout);
+    btn.disabled=false;
+    btn.textContent="↻ 刷新资讯";
+  }
 }
 $("refresh").addEventListener("click",fetchNews);
 $("filters").addEventListener("click",e=>{const btn=e.target.closest("[data-filter]");if(!btn)return;activeFilter=btn.dataset.filter;document.querySelectorAll(".filter").forEach(b=>b.classList.toggle("active",b===btn));draw();});
